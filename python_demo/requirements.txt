@@ -1,0 +1,6 @@
+gradio
+torch
+diffusers
+transformers
+sentencepiece
+protobuf
