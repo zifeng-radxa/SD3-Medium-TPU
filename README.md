@@ -1,9 +1,9 @@
 # Stable Diffusion 3 Medium TPU
 
 ## Language
-[中文](README_ZH)
+[中文](README_ZH.md)
 
-[English](README)
+[English](README.md)
 
 ---
 Stable Diffusion 3 Medium is a Multimodal Diffusion Transformer (MMDiT) text-to-image model that features greatly improved performance in image quality, typography, complex prompt understanding, and resource-efficiency. The current usage involves porting the open-source model [Stable Diffusion 3 Medium](https://huggingface.co/stabilityai/stable-diffusion-3-medium) to the SG2300X chip series products via the Sophon SDK for local TPU hardware-accelerated inference, enabling fast inference to generate stylized images with text, and using Gradio for user interaction.

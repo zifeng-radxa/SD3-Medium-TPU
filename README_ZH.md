@@ -1,9 +1,9 @@
 # Stable Diffusion 3 Medium TPU
 
 ## 语言
-[中文](README_ZH)
+[中文](README_ZH.md)
 
-[Englisn](README)
+[Englisn](README.md)
 
 ---
 Stable Diffusion 3 Medium 是一种多模态扩散变换器 (MMDiT) 文本到图像模型，在图像质量、排版、复杂提示理解和资源效率方面具有显著提升的性能。目前使用 [Stable Diffusion 3 Medium](https://huggingface.co/stabilityai/stable-diffusion-3-medium)
