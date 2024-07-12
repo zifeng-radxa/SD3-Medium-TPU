@@ -1,36 +1,40 @@
 # Stable Diffusion 3 Medium TPU
 
-Stable Diffusion 3 Medium 是一种多模态扩散变换器 (MMDiT) 文本到图像模型，在图像质量、排版、复杂提示理解和资源效率方面具有显著提升的性能。目前使用 [Stable Diffusion 3 Medium](https://huggingface.co/stabilityai/stable-diffusion-3-medium)
-开源模型通过 sophon SDK 移植到 SG2300X 芯片系列产品上进行本地 TPU 硬件加速推理，实现快速推理生成特色风格带文本的图片，并使用 Gradio 实现用户交互。
+## Language
+[中文](README_ZH)
 
-有关 Stable Diffusion 3 Medium 更多技术细节，请参阅[官方网站](https://stability.ai/news/stable-diffusion-3)和[研究论文](https://stability.ai/news/stable-diffusion-3-research-paper)。
+[English](README)
+
+---
+Stable Diffusion 3 Medium is a Multimodal Diffusion Transformer (MMDiT) text-to-image model that features greatly improved performance in image quality, typography, complex prompt understanding, and resource-efficiency. The current usage involves porting the open-source model [Stable Diffusion 3 Medium](https://huggingface.co/stabilityai/stable-diffusion-3-medium) to the SG2300X chip series products via the Sophon SDK for local TPU hardware-accelerated inference, enabling fast inference to generate stylized images with text, and using Gradio for user interaction.
+
+For more technical details on Stable Diffusion 3 Medium, please refer to the [official website](https://stability.ai/news/stable-diffusion-3) and the [research paper](https://stability.ai/news/stable-diffusion-3-research-paper).
 
 <img src="./assest/preview.jpg" width=400/>
 
-## 应用部署
+---
+## Application Deployment
 
-- 克隆仓库
+- Clone the repository
 
   ```bash
   git clone https://github.com/zifeng-radxa/SD3-Medium-TPU.git
   ```
 
-- 下载 radxa 提供的 Stable Diffusion 3 Medium models 压缩包
+- Download the Stable Diffusion 3 Medium models package provided by radxa
 
-  用户也可通过参考 [模型转换](#模型转换) 编译 Stable Diffusion 3 Medium 模型
+  Users can also compile the Stable Diffusion 3 Medium model by referring to [Model Conversion](#Model-Conversion)
 
   ```bash
   cd SD3-Medium-TPU/python_demo/
   bash tar_downloader.sh
   ```
-- 当前路径解压模型
+- Extract the model in the current directory
   ```bash
   tar -xvf models.tar.gz
   ```
 
-- 配置环境
-
-  **必须创建虚拟环境，否则可能会影响其他应用的正常运行**， 虚拟环境使用请参考[这里](../ai-tools/virtualenv_usage)
+- Configure the environment
 
   ```bash
   cd SD3-Medium-TPU/python_demo/
@@ -38,40 +42,40 @@ Stable Diffusion 3 Medium 是一种多模态扩散变换器 (MMDiT) 文本到图
   source .venv/bin/activate
   ```
 
-- 安装依赖
+- Install dependencies
 
   ```bash
   pip3 install --upgrade pip
   pip3 install -r requirements.txt
   ```
 
-- 启动 Web 服务
+- Start the Web service
 
   ```bash
   python3 gr.py
   ```
 
-- 浏览器访问 Airbox ip 地址的 8999 端口
+- Access the Airbox IP address on port 8999 via a browser
 
+---
 
-
-## 应用展示
+## Application Demonstration
 
 #### Text-to-Image
-
 
 ```bash
 Prompt: A cat with a sign text Welcome to radxa!
 ```
 <img src="./assest/preview_2.jpg" width=700/>
 
-## 模型转换
+---
+## Model Conversion
 TODO
 
 
 
+---
+## License
+Community License: Free for research, non-commercial, and commercial use. You only need a paid Enterprise license if your yearly revenues exceed USD$1M and you use Stability AI models in commercial products or services. Read more: https://stability.ai/license
 
-## License 许可
-社区许可： 免费用于研究、非商业和商业用途。只有当您的年收入超过 100 万美元并在商业产品或服务中使用 Stability AI 模型时，才需要付费的企业许可证。更多信息：https://stability.ai/license
-
-对于超过此收入门槛的公司：请联系： https://stability.ai/enterprise
+For companies above this revenue threshold: please contact us: https://stability.ai/enterprise
