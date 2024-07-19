@@ -74,7 +74,10 @@ Prompt: A cat with a sign text Welcome to radxa!
 ## 模型转换
 TODO
 
+---
 
+## 硬件支持
+- [radxa Fogwise® AirBox](https://radxa.com/products/fogwise/airbox)
 
 ---
 ## License 许可

@@ -72,7 +72,10 @@ Prompt: A cat with a sign text Welcome to radxa!
 ## Model Conversion
 TODO
 
+---
 
+## Hardware Support
+- [radxa Fogwise® AirBox](https://radxa.com/products/fogwise/airbox)
 
 ---
 ## License
