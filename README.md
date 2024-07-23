@@ -13,6 +13,9 @@ For more technical details on Stable Diffusion 3 Medium, please refer to the [of
 <img src="./assest/preview.jpg" width=400/>
 
 ---
+
+> Recommend TPU Memory: NPU->7615MB, VPU->2360MB, VPP->2360MB 
+
 ## Application Deployment
 
 - Clone the repository

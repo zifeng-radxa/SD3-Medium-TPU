@@ -14,6 +14,9 @@ Stable Diffusion 3 Medium 是一种多模态扩散变换器 (MMDiT) 文本到图
 <img src="./assest/preview.jpg" width=400/>
 
 ---
+
+> 推荐 TPU 内存分配： NPU->7615MB, VPU->2360MB, VPP->2360MB 
+
 ## 应用部署
 
 - 克隆仓库
