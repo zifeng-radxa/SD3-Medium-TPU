@@ -3,29 +3,30 @@ from diffusers import StableDiffusion3Pipeline
 import torch.nn as nn
 import os
 
+
 def make_dir(path):
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
 
-# make_dir("./tmp")
-# make_dir("./tmp/vae")
-# make_dir("./tmp/mmdit")
-# make_dir("./tmp/t5")
-# make_dir("./tmp/clip_l")
-# make_dir("./tmp/clip_g")
 
+make_dir("./tmp")
+make_dir("./tmp/vae")
+make_dir("./tmp/mmdit")
+make_dir("./tmp/t5")
+make_dir("./tmp/clip_l")
+make_dir("./tmp/clip_g")
 
-SD3_HUGGINGFACE_PATH = "/data/aigc/stable-diffusion-3-medium-diffusers"
+SD3_HUGGINGFACE_PATH = "../../stable-diffusion-3-medium-diffusers"
 pipe = StableDiffusion3Pipeline.from_pretrained(SD3_HUGGINGFACE_PATH, torch_dtype=torch.float32)
 
 sd3 = pipe.transformer
 vae = pipe.vae
 
-vae= vae.eval()
+vae = vae.eval()
 for para in vae.parameters():
     para.requires_grad = False
 
-# ================= export vae model ==================== #
+# # ================= export vae model ==================== #
 class VAE_Decoder(nn.Module):
 
     def __init__(self):
@@ -40,12 +41,12 @@ class VAE_Decoder(nn.Module):
 
 vae_decoder = VAE_Decoder()
 
-# ================= export over ==================== #
-
 fake_inputs = torch.randn(1, 16, 128, 128)
 torch.onnx.export(vae_decoder, fake_inputs, "./tmp/vae/vae_decoder.onnx")
+# # ================= export over ==================== #
 
-# ================= export sd3 model ==================== #
+
+# # ================= export sd3 model ==================== #
 
 class FixedLayerNorm(nn.Module):
     def __init__(self, embedding_dim):
@@ -113,14 +114,14 @@ class SD3Head(torch.nn.Module):
         self.silu  = torch.nn.SiLU()
         # self.silu = torch.nn.Identity()
     def forward(self,hidden_states, encoder_hidden_states, pooled_projections,  timestep):
-        hidden_states = self.pos_embed(hidden_states) 
+        hidden_states = self.pos_embed(hidden_states)
         temb = self.silu(self.time_text_embed(timestep, pooled_projections))
         encoder_hidden_states = self.context_embedder(encoder_hidden_states)
         temb = temb
         return hidden_states, temb, encoder_hidden_states
 
 sd3head = SD3Head()
-fake_dict = {"hidden_states": fake_inputs[0], 
+fake_dict = {"hidden_states": fake_inputs[0],
                             "encoder_hidden_states":fake_inputs[1],
                             "pooled_projections": fake_inputs[2],
                              "timestep": fake_inputs[-1]}
@@ -147,11 +148,11 @@ class SD3Block(torch.nn.Module):
     def __init__(self,idx):
         super().__init__()
         self.block = sd3.transformer_blocks[idx]
-        self.idx = idx 
-        
+        self.idx = idx
+
     def forward(self, hidden_states, temb, encoder_hidden_states):
-        encoder_hidden_states, hidden_states = self.block(hidden_states=hidden_states, 
-                                                          encoder_hidden_states=encoder_hidden_states, 
+        encoder_hidden_states, hidden_states = self.block(hidden_states=hidden_states,
+                                                          encoder_hidden_states=encoder_hidden_states,
                                                           temb=temb)
         if self.idx == 23:
             return hidden_states
@@ -163,7 +164,7 @@ sd3block = []
 for i in tqdm(range(23)):
     sd3block.append(SD3Block(i).eval())
     # if save_onnx:
-    #     torch.onnx.export(sd3block[-1], (hidden_states, temb, encoder_hidden_states), 
+    #     torch.onnx.export(sd3block[-1], (hidden_states, temb, encoder_hidden_states),
     #                       f"/data/aigc/demos/sd3models/mmdit/block_{i}.onnx",do_constant_folding=True)
     torch.jit.trace( sd3block[-1], (hidden_states, temb, encoder_hidden_states)).save(f"./tmp/mmdit/block_{i}.pt")
     encoder_hidden_states, hidden_states = sd3block[-1](hidden_states, temb, encoder_hidden_states)
@@ -191,14 +192,13 @@ class SD3Tail(torch.nn.Module):
         return hidden
 sd3tail = SD3Tail()
 res = sd3tail(hidden_states, temb)
-if save_onnx: 
+if save_onnx:
     torch.jit.trace( sd3tail, (hidden_states, temb)).save(f"./tmp/mmdit/tail.pt")
-    # torch.onnx.export(sd3tail, (hidden_states, temb), "/data/aigc/demos/sd3models/mmdit/tail.onnx")
-print(res)
-# ================= export over ==================== #
+    torch.onnx.export(sd3tail, (hidden_states, temb), "/data/aigc/demos/sd3models/mmdit/tail.onnx")
+# # ================= export over ==================== #
 
 
-# ================= export t5 ==================== #
+# # ================= export t5 ==================== #
 t5_encoder = [[   71,  1712,  3609,     3,     9,  1320,    24,   845, 21820,   296,
              1,     0,     0,     0,     0,     0,     0,     0,     0,     0,
              0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
@@ -233,7 +233,7 @@ class T5block0(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.block0 = t5model.encoder.block[0].layer
-        
+
     def forward(self, test_input):
         output = self.block0[0](test_input, t, temp_value)
         hidden_states = output[0]
@@ -266,13 +266,13 @@ for i in tqdm(range(1,24)):
 
 torch.jit.trace(t5head, t5_encoder_inputs).save("./tmp/t5/t5_encoder_head.pt")
 torch.jit.trace(t5model.encoder.final_layer_norm, hidden_states).save("./tmp/t5/tail.pt")
-res = t5model.encoder.final_layer_norm(hidden_states)
+# res = t5model.encoder.final_layer_norm(hidden_states)
 # res
 # ================= export over ==================== #
 
-# ================= export clip ==================== #
+# # ================= export clip ==================== #
 max_seq_len = 77
-test_input = torch.randint(0,1000,(1,max_seq_len))
+test_input = torch.randint(0, 1000, (1, max_seq_len))
 from transformers.modeling_attn_mask_utils import _create_4d_causal_attention_mask
 causal_attention = _create_4d_causal_attention_mask([1,max_seq_len], torch.float32, device="cpu")
 clip0_model = pipe.text_encoder_2
@@ -283,6 +283,20 @@ class CLIPHead(torch.nn.Module):
         self.emb = clip0_model.text_model.embeddings
     def forward(self, x):
         return self.emb(x)
+
+class CLIPTail(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.final_layer_norm = clip0_model.text_model.final_layer_norm
+        self.text_proj = clip0_model.text_projection
+
+    def forward(self, x, inputs):
+        x = self.final_layer_norm(x)
+        x = x[0, inputs.argmax(dim=-1)]
+        x = self.text_proj(x)
+        return x
+
+tail = CLIPTail()
 head = CLIPHead()
 torch.onnx.export(head, test_input, "./tmp/clip_l/head.onnx")
 input1 = head(test_input)
@@ -296,37 +310,63 @@ for i in range(32):
     block0 = CLIPBlock(i)
     torch.onnx.export(block0, input1, f"./tmp/clip_l/block_{i}.onnx")
     input1 = block0(input1)
-res_t = clip0_model.text_model.final_layer_norm(input1)
-torch.onnx.export(clip0_model.text_model.final_layer_norm, input1, f"./tmp/clip_l/tail.onnx")
+# res_t = clip0_model.text_model.final_layer_norm(input1)
+res_t = tail(input1, test_input)
+torch.onnx.export(tail, (input1, test_input), f"./tmp/clip_l/tail.onnx")
 
 
-# ================= export over ==================== #
+# # ================= export over ==================== #
 
 
 # ================= export clip ==================== #
 from transformers.modeling_attn_mask_utils import _create_4d_causal_attention_mask
-causal_attention = _create_4d_causal_attention_mask([1,max_seq_len], torch.float32, device="cpu")
+
+causal_attention = _create_4d_causal_attention_mask([1, max_seq_len], torch.float32, device="cpu")
 clip0_model = pipe.text_encoder
 clip0_model = clip0_model.eval()
+
+
 class CLIPHead(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.emb = clip0_model.text_model.embeddings
+
     def forward(self, x):
         return self.emb(x)
+
+
+class CLIPTail(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.final_layer_norm = clip0_model.text_model.final_layer_norm
+        self.text_proj = clip0_model.text_projection
+
+    def forward(self, x, inputs):
+        x = self.final_layer_norm(x)
+        x = x[0, inputs.argmax(dim=-1)]
+        x = self.text_proj(x)
+        return x
+
+
+tail = CLIPTail()
 head = CLIPHead()
 torch.onnx.export(head, test_input, "./tmp/clip_g/head.onnx")
 input1 = head(test_input)
+
+
 class CLIPBlock(torch.nn.Module):
-    def __init__(self,idx):
+    def __init__(self, idx):
         super().__init__()
         self.block = clip0_model.text_model.encoder.layers[idx]
+
     def forward(self, x):
         return self.block(x, None, causal_attention)[0]
+
+
 for i in range(12):
     block0 = CLIPBlock(i)
     torch.onnx.export(block0, input1, f"./tmp/clip_g/block_{i}.onnx")
     input1 = block0(input1)
-res_t = clip0_model.text_model.final_layer_norm(input1)
-torch.onnx.export(clip0_model.text_model.final_layer_norm, input1, f"./tmp/clip_g/tail.onnx")
+res_t = tail(input1, test_input)
+torch.onnx.export(tail, (input1, test_input), f"./tmp/clip_g/tail.onnx")
 # ================= export over ==================== #
