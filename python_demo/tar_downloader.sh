@@ -6,7 +6,7 @@ LOCAL_DIR="./"
 MODEL="models.tar.gz"
 
 
-for SUFFIX in aa ab ac ae; do
+for SUFFIX in aa ab ac ad ae; do
   FILE_NAME="$MODEL.$SUFFIX"
   FILE_URL="$REMOTE_DIR/$FILE_NAME"
 
